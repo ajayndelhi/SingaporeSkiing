@@ -133,7 +133,7 @@ void RouteGrid::DenormalizePaths()
 	//this->Dump(this->points);
 	//cout << "================================\n";
 
-	// this is the navigation path
+	// this is the navigation path to store the paths available
 	this->navPath = new List<int>();
 
 	this->prevNavPathCount = 0;
@@ -148,7 +148,7 @@ void RouteGrid::DenormalizePaths()
 		// if the current point can be reached from some higher elevation, 
 		// we don't want to process current point, as it is already part of some other elevation point
 		// thus part of a longer path already.
-		// Also if no paths from current point - return;
+		// Also if no paths from current point - continue
 		if (currentPoint->IsReachableFromHigherElevation == false && currentPoint->GetPathCount() > 0)
 		{
 			this->standaloneElevationPointCount++;
@@ -177,14 +177,12 @@ void RouteGrid::DenormalizePaths()
 
 void RouteGrid::ProcessChild(MountainPoint *childPoint)
 {
-	//childPoint->IsVisited = true;
 	this->navPath->Add(childPoint->runningIndex);
 	this->ProcessGrandChildren(childPoint);
 }
 
 void RouteGrid::ProcessGrandChildren(MountainPoint *childPoint)
 {
-	//List<int> *path = childPoint->paths;
 	int *path = childPoint->paths;
 
 	// no paths from current point - return;
@@ -210,7 +208,6 @@ void RouteGrid::ReadyNavPath(List<int> *navPath)
 {
 	this->totalPathsAnalyzed++;
 
-
 	int pathCount = navPath->Count();
 	int elevationDropValue = points[navPath->GetItem()]->elevation - points[navPath->GetLast()->GetItem()]->elevation;
 
@@ -219,18 +216,8 @@ void RouteGrid::ReadyNavPath(List<int> *navPath)
 		return;
 	}
 
-	bool persist = false;
-	if (pathCount > this->prevNavPathCount)
-	{
-		persist = true;
-	}
-
-	if(pathCount == this->prevNavPathCount && elevationDropValue > this->prevNavPathSteepValue)
-	{
-		persist = true;
-	}
-
-	if (persist)
+	if (pathCount > this->prevNavPathCount || 
+		(pathCount == this->prevNavPathCount && elevationDropValue > this->prevNavPathSteepValue))
 	{
 		this->PersistNavPath(navPath, pathCount, elevationDropValue);
 		this->prevNavPathCount = pathCount;
@@ -246,26 +233,27 @@ void RouteGrid::PersistNavPath(List<int> *navPath, int pathCount, int elevationD
 	}
 
 	// clear previous contents of result buffer
+	this->resultBuffer.clear();
 	this->resultBuffer.str(std::string());
 
 	// this will redirect cout to buffer and on exit of (), will reset cout to as before
-	cout_redirect coutredir(this->resultBuffer.rdbuf());
+	// cout_redirect coutredir(this->resultBuffer.rdbuf());
 
-	cout << "   *** Path Count = " << pathCount << "; Elevation Drop = " << elevationDropValue << "; ***" << endl;
+	this->resultBuffer << "   *** Path Count = " << pathCount << "; Elevation Drop = " << elevationDropValue << "; ***" << endl;
 	List<int> *p = navPath;
 	while(p)
 	{
 		MountainPoint *mp = this->points[p->GetItem()];
-		cout << "[" << mp->actualRow << "," << mp->actualCol << "]" << mp->elevation;
+		this->resultBuffer << "[" << mp->actualRow << "," << mp->actualCol << "]" << mp->elevation;
 		p=p->GetNext();
 
 		if (p)
 		{
-			cout << "-";
+			this->resultBuffer << "-";
 		}
 	}
 
-	cout << endl << endl << endl;
+	this->resultBuffer << endl << endl << endl;
 }
 
 void RouteGrid::UnWindNavPath(List<int> *navPath, MountainPoint *mp)
