@@ -19,7 +19,7 @@
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	int dataSize = SIMPLEDATASIZE;
+	int dataSize = COMPLEXDATASIZE;
 
 	int **dataGrid = NULL;
 

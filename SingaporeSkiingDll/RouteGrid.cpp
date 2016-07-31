@@ -91,6 +91,17 @@ void RouteGrid::CreateList()
 			StorePathIfValid(mp, i, j+1);  // west
 		}
 	}
+
+	// Debug code
+	//int reachableNodes = 0;
+	//for (int i = 0; i < arraySize; i++)
+	//{
+	//	if (this->points[i]->IsReachableFromHigherElevation)
+	//	{
+	//		reachableNodes++;
+	//	}
+	//}
+	//cout << "Nodes Reachable from higher elevation and ignored = " << reachableNodes << endl;
 }
 
 void RouteGrid::StorePathIfValid(MountainPoint *mp, int tr, int tc)
