@@ -20,14 +20,11 @@ RouteGrid::RouteGrid(int **data, int size)
 
 	this->totalPathsAnalyzed = 0;
 	this->standaloneElevationPointCount = 0;
-
-	//this->resultBuffer = new streambuf();
 }
 
 bool RouteGrid::ValidateData(int lowestValue, int highestValue)
 {
 	// check that all values are in range
-
 	for(int i = 0; i <this->gridSize; i++)
 	{
 		for(int j = 0; j < this->gridSize; j++)
@@ -62,10 +59,13 @@ void RouteGrid::CreateEmptyElevationPointsArray()
 	int arraySize = this->gridSize * this->gridSize;
 	this->points = new MountainPoint*[arraySize];
 
-	// initialize array created here
-	for(int x = 0; x < arraySize; x++)
+	for (int r = 0; r < this->gridSize; r++)
 	{
-		this->points[x] = NULL;
+		for (int c = 0; c < this->gridSize; c++)
+		{
+			int runningIndex = (r*gridSize) + c;
+			this->points[runningIndex] = MountainPoint::CreateMountainPoint(0, r, c, runningIndex, false);
+		}
 	}
 }
 
@@ -78,26 +78,22 @@ void RouteGrid::CreateList()
 	{
 		for(int j = 0; j < this->gridSize; j++)
 		{
-			int elevation = this->data[i][j];
 			int runningIndex = (i*gridSize)+j;
 
-			// try to get it from array - may be it has been created as part of storing paths for other elevation points
+			// get object from array - as it has been already created;
 			MountainPoint *mp = this->points[runningIndex];
-			if (mp == NULL)
-			{
-				this->points[runningIndex] = mp = MountainPoint::CreateMountainPoint(elevation, i, j, runningIndex, false);
-			}
+			mp->elevation = this->data[i][j];
 
 			// Store possible moves from current elevation point
-			StorePathIfValid(elevation, i-1, j, mp);  // north
-			StorePathIfValid(elevation, i+1, j, mp);  // south
-			StorePathIfValid(elevation, i, j-1, mp);  // east
-			StorePathIfValid(elevation, i, j+1, mp);  // west
+			StorePathIfValid(mp, i-1, j);  // north
+			StorePathIfValid(mp, i+1, j);  // south
+			StorePathIfValid(mp, i, j-1);  // east
+			StorePathIfValid(mp, i, j+1);  // west
 		}
 	}
 }
 
-void RouteGrid::StorePathIfValid(int fromElevation, int tr, int tc, MountainPoint *mp)
+void RouteGrid::StorePathIfValid(MountainPoint *mp, int tr, int tc)
 {
 	if (tr < 0 || tc < 0 || tr >= gridSize || tc >= gridSize)
 	{
@@ -106,25 +102,15 @@ void RouteGrid::StorePathIfValid(int fromElevation, int tr, int tc, MountainPoin
 
 	int toElevation = this->data[tr][tc];
 	// can only move to a point with lower elevation than current elevation value
-	if (toElevation < fromElevation)
+	if (toElevation < mp->elevation)
 	{
 		// calculate running index of toElevation
 		int runningIndex = (tr*gridSize)+tc;
 		mp->StorePath(runningIndex);
 
-		// check if the MountainPoint at runningIndex has already been created
-		// if yes - set its IsReachable property to true
-		// if not - create new MountainPoint and with IsReachable as True
-
-		MountainPoint *mp = points[runningIndex];
-		if (mp != NULL)
-		{
-			mp->IsReachableFromHigherElevation = true;
-		}
-		else
-		{
-			points[runningIndex] = MountainPoint::CreateMountainPoint(toElevation,  tr, tc, runningIndex, true);
-		}
+		// set IsReachableFromHigherElevation to true
+		// for elevation point indicated by tr, tc, as it can be reached from mp
+		points[runningIndex]->IsReachableFromHigherElevation = true;
 	}
 }
 
@@ -141,27 +127,16 @@ void RouteGrid::DenormalizePaths()
 	
 	for(int i = 0; i < (gridSize*gridSize); i++)
 	{
-		MountainPoint *currentPoint = this->points[i];
-
-		int *path = currentPoint->paths;
-
 		// if the current point can be reached from some higher elevation, 
 		// we don't want to process current point, as it is already part of some other elevation point
 		// thus part of a longer path already.
 		// Also if no paths from current point - continue
-		if (currentPoint->IsReachableFromHigherElevation == false && currentPoint->GetPathCount() > 0)
+		if (this->points[i]->IsReachableFromHigherElevation == false)
 		{
 			this->standaloneElevationPointCount++;
-			this->navPath->Add(currentPoint->runningIndex);
-			for(int x = 0; x < MAX_PATHS_FROM_ELEVATION && path[x] >= 0; x++)
-			{
-				this->ProcessChild(this->points[path[x]]);
-
-				// dump navPaths and then rewind upto current point
-				this->ReadyNavPath(this->navPath);
-				this->UnWindNavPath(navPath, currentPoint);
-			}
-			navPath->EmptyList();
+			this->ProcessElevationPoint(this->points[i]);
+			this->ReadySkiPath(this->navPath);
+			this->navPath->EmptyList();
 		}
 	}
 
@@ -171,46 +146,42 @@ void RouteGrid::DenormalizePaths()
 	cout << "  Total " << this->totalPathsAnalyzed << " paths Analyzed=" << " from " << this->standaloneElevationPointCount << " elevation points." << endl;
 	cout << "===========================================================" << endl;
 
+	// this will output the final / result path 
+	// PersistSkiPath() writes to the buffer at resultBuffer
 	cout << this->resultBuffer.str();
-
 }
 
-void RouteGrid::ProcessChild(MountainPoint *childPoint)
+void RouteGrid::ProcessElevationPoint(MountainPoint *elevationPoint)
 {
-	this->navPath->Add(childPoint->runningIndex);
-	this->ProcessGrandChildren(childPoint);
-}
-
-void RouteGrid::ProcessGrandChildren(MountainPoint *childPoint)
-{
-	int *path = childPoint->paths;
+	this->navPath->Add(elevationPoint->runningIndex);
 
 	// no paths from current point - return;
-	int pathCount = childPoint->GetPathCount();
-	if (pathCount <= 0)
+	int pathCount = elevationPoint->GetPathCount();
+	if (pathCount > 0)
 	{
-		return;
-	}
-
-	for(int x=0; x < MAX_PATHS_FROM_ELEVATION && path[x] >=0; x++)
-	{
-		this->ProcessChild(this->points[path[x]]);
-		if (x+1 < pathCount) // more path exist;
+		int *path = elevationPoint->paths;
+		for (int x = 0; x < MAX_PATHS_FROM_ELEVATION && path[x] >= 0; x++)
 		{
-			// dump navPaths and then rewind upto current point
-			this->ReadyNavPath(this->navPath);
-			this->UnWindNavPath(this->navPath, childPoint);
+			this->ProcessElevationPoint(this->points[path[x]]);
+			if (x + 1 < pathCount) // more path exist;
+			{
+				// dump navPaths and then rewind upto current point
+				this->ReadySkiPath(this->navPath);
+				this->UnWindNavPath(this->navPath, elevationPoint);
+			}
 		}
 	}
 }
 
-void RouteGrid::ReadyNavPath(List<int> *navPath)
+void RouteGrid::ReadySkiPath(List<int> *navPath)
 {
 	this->totalPathsAnalyzed++;
 
 	int pathCount = navPath->Count();
 	int elevationDropValue = points[navPath->GetItem()]->elevation - points[navPath->GetLast()->GetItem()]->elevation;
 
+	// path is found, now apply business rules before the path is accepted/overrides 
+	// previously found paths.
 	if (pathCount == 0 || pathCount < this->prevNavPathCount)
 	{
 		return;
@@ -219,13 +190,15 @@ void RouteGrid::ReadyNavPath(List<int> *navPath)
 	if (pathCount > this->prevNavPathCount || 
 		(pathCount == this->prevNavPathCount && elevationDropValue > this->prevNavPathSteepValue))
 	{
-		this->PersistNavPath(navPath, pathCount, elevationDropValue);
+		this->PersistSkiPath(navPath, pathCount, elevationDropValue);
 		this->prevNavPathCount = pathCount;
 		this->prevNavPathSteepValue = elevationDropValue;
 	}
 }
 
-void RouteGrid::PersistNavPath(List<int> *navPath, int pathCount, int elevationDropValue)
+// write path to resultBuffer by clearing any previous contents of the buffer
+// this way, resultBuffer always has latest and greatest ski path;
+void RouteGrid::PersistSkiPath(List<int> *navPath, int pathCount, int elevationDropValue)
 {
 	if (navPath->Count() == 0)
 	{
@@ -245,6 +218,7 @@ void RouteGrid::PersistNavPath(List<int> *navPath, int pathCount, int elevationD
 	{
 		MountainPoint *mp = this->points[p->GetItem()];
 		this->resultBuffer << "[" << mp->actualRow << "," << mp->actualCol << "]" << mp->elevation;
+		//this->resultBuffer << "[" << mp->actualRow << "," << mp->actualCol << "]" << mp->runningIndex;
 		p=p->GetNext();
 
 		if (p)
@@ -253,7 +227,7 @@ void RouteGrid::PersistNavPath(List<int> *navPath, int pathCount, int elevationD
 		}
 	}
 
-	this->resultBuffer << endl << endl << endl;
+	this->resultBuffer << endl << endl ;
 }
 
 void RouteGrid::UnWindNavPath(List<int> *navPath, MountainPoint *mp)
@@ -303,7 +277,7 @@ void RouteGrid::Dump(MountainPoint *mountainPoints[])
 	}
 }
 
-void RouteGrid::DeleteList()
+RouteGrid::~RouteGrid()
 {
 	if (this->points != NULL)
 	{
@@ -318,4 +292,6 @@ void RouteGrid::DeleteList()
 		delete this->points;
 		this->points = NULL;
 	}
+
+	this->data = NULL;
 }

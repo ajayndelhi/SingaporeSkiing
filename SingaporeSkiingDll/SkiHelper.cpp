@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "TestData.h"
+#include "SkiHelper.h"
 #include "exception"
+#include <ctime>
 using namespace std;
 
-int ** TestData::CreateSimpleTestData(int size)
+int ** SkiHelper::CreateSimpleTestData(int size)
 {
 	int **ptr = NULL;
 
@@ -42,15 +43,15 @@ int ** TestData::CreateSimpleTestData(int size)
 }
 
 
-int ** TestData::CreateTestData(int size)
+int ** SkiHelper::CreateTestData(int size)
 {
 	if (size == 4)
 	{
-		return TestData::CreateSimpleTestData(size);
+		return SkiHelper::CreateSimpleTestData(size);
 	}
 	else if (size == 1000)
 	{
-		return TestData::CreateLargeTestData(size);
+		return SkiHelper::CreateLargeTestData(size);
 	}
 	else
 	{
@@ -58,7 +59,7 @@ int ** TestData::CreateTestData(int size)
 	}
 }
 
-void TestData::DeleteTestData(int size, int **ptr)
+void SkiHelper::DeleteTestData(int size, int **ptr)
 {
 	if (ptr == NULL)
 	{
@@ -76,7 +77,7 @@ void TestData::DeleteTestData(int size, int **ptr)
 }
 
 
-int ** TestData::CreateLargeTestData(int size)
+int ** SkiHelper::CreateLargeTestData(int size)
 {
 	int **ptr = NULL;
 
@@ -94,7 +95,7 @@ int ** TestData::CreateLargeTestData(int size)
 			if (lineCount > 1)
 			{
 				//cout << lineCount << endl;
-				TestData::GetTokensFromLine(line, elems);
+				SkiHelper::GetTokensFromLine(line, elems);
 			}
 		}
 		inputFile.close();
@@ -124,7 +125,7 @@ int ** TestData::CreateLargeTestData(int size)
 	return ptr;
 }
 
-void TestData::GetTokensFromLine(string line, vector<int> &elems)
+void SkiHelper::GetTokensFromLine(string line, vector<int> &elems)
 {
 	stringstream ss(line);
 	string item;
@@ -132,4 +133,16 @@ void TestData::GetTokensFromLine(string line, vector<int> &elems)
 	{
 		elems.push_back(stoi(item));
 	}
+}
+
+const std::string SkiHelper::CurrentDateTime()
+{
+	time_t     now = time(0);
+	struct tm  *tstruct = new struct tm;
+	char       buf[80];
+
+	localtime_s(tstruct, &now);
+	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", tstruct);
+
+	return buf;
 }

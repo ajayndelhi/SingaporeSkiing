@@ -25,29 +25,24 @@ private:
 	// and can't be reached otherwise;  Also from these points, you can make atleast one move.
 
 	std::stringstream resultBuffer;
-	//streambuf resultBuffer;
 
-	void StorePathIfValid(int currentValue, int tr, int tc, MountainPoint *);
+	void StorePathIfValid(MountainPoint *, int tr, int tc);
 	void Dump(MountainPoint **);
-	void ProcessChild(MountainPoint *);
-	void ProcessGrandChildren(MountainPoint *);
-	void PersistNavPath(List<int> *navPath, int pathCount, int elevationDropValue);
-	void ReadyNavPath(List<int> *navPath);
+	void ProcessElevationPoint(MountainPoint *);
+	void PersistSkiPath(List<int> *navPath, int pathCount, int elevationDropValue);
+	void ReadySkiPath(List<int> *navPath);
 	void UnWindNavPath(List<int> *navPath, MountainPoint *);
 
 	void CreateEmptyElevationPointsArray();
-
-
-
 public:
 	__declspec(dllexport) RouteGrid(int **data, int size);
+
 	__declspec(dllexport) bool ValidateData(int lowestValue, int highestValue);
 	__declspec(dllexport) void PrintData();
 
 	__declspec(dllexport) void CreateList();
 	__declspec(dllexport) void DenormalizePaths();
 
-	__declspec(dllexport) void DeleteList();
-
+	__declspec(dllexport) ~RouteGrid();
 protected:
 };

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "RouteGrid.h"
-#include "TestData.h"
+#include "SkiHelper.h"
 #include "List.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -15,7 +15,7 @@ namespace SingaporeSkiingTest
 		{
 			// Arrange
 			int **dataGrid = NULL;
-			dataGrid = TestData::CreateTestData(4);
+			dataGrid = SkiHelper::CreateTestData(4);
 
 			RouteGrid *rg = new RouteGrid(dataGrid, 4);
 

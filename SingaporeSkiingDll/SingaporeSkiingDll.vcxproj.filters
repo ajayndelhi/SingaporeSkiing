@@ -27,9 +27,6 @@
     <ClInclude Include="RouteGrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="List.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="coutRedirect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkiHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,13 +50,13 @@
     <ClCompile Include="RouteGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MountainPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="coutRedirect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkiHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

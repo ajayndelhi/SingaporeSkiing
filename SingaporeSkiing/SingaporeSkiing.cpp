@@ -3,10 +3,9 @@
 
 #include "stdafx.h"
 #include "RouteGrid.h"
-#include "TestData.h"
+#include "SkiHelper.h"
 #include "exception"
 #include <iostream>
-#include <ctime>
 
 //
 // Problem Definition
@@ -18,19 +17,6 @@
 #define SIMPLEDATASIZE 4
 #define COMPLEXDATASIZE 1000
 
-const std::string currentDateTime() 
-{
-    time_t     now = time(0);
-    struct tm  *tstruct = new struct tm;
-    char       buf[80];
-
-    localtime_s(tstruct, &now);
-    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", tstruct);
-
-    return buf;
-}
-
-
 int _tmain(int argc, _TCHAR* argv[])
 {
 	int dataSize = SIMPLEDATASIZE;
@@ -39,13 +25,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		cout << currentDateTime() << " Reading input data..." << endl;
-		dataGrid = TestData::CreateTestData(dataSize);
+		cout << SkiHelper::CurrentDateTime() << " Reading input data..." << endl;
+		dataGrid = SkiHelper::CreateTestData(dataSize);
 		
-		cout << currentDateTime() << " Creating class object..." << endl;
+		cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
 		RouteGrid *rg = new RouteGrid(dataGrid, dataSize);
 
-		cout << currentDateTime() << " Validating input data values..." << endl;
+		cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
 		bool dataStatus = rg->ValidateData(0, 1500);
 
 		if (!dataStatus)
@@ -55,18 +41,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 
 		// create nodes for the items in the array
-		cout << currentDateTime() << " Creating graph list..." << endl;
+		cout << SkiHelper::CurrentDateTime() << " Creating graph list..." << endl;
 		rg->CreateList();
 
-		cout << currentDateTime() << " Finding Best Path..." << endl;
+		cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
 		rg->DenormalizePaths();
 
-		cout << currentDateTime() << " Releasing Memory..." << endl;
-		rg->DeleteList();
+		cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
 		delete rg;
 
-		cout << currentDateTime() << " Deleting Test Data from memory..." << endl;
-		TestData::DeleteTestData(dataSize, dataGrid);
+		cout << SkiHelper::CurrentDateTime() << " Deleting Test Data from memory..." << endl;
+		SkiHelper::DeleteTestData(dataSize, dataGrid);
 		dataGrid = NULL;
 	}
 	catch(std::exception &e)

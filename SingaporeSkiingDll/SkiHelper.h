@@ -4,7 +4,7 @@
 #include <vector>
 using namespace std;
 
-class TestData
+class SkiHelper
 {
 private:
 	static int ** CreateSimpleTestData(int size);
@@ -13,6 +13,9 @@ private:
 public:
 	static __declspec(dllexport) int ** CreateTestData(int size);
 	static __declspec(dllexport) void DeleteTestData(int size, int **);
+
+	static __declspec(dllexport) const std::string CurrentDateTime();
+
 protected:
 };
 
