@@ -5,7 +5,7 @@
 #include "coutRedirect.h"
 using namespace std;
 
-RouteGrid::RouteGrid(int **data, int size)
+RouteGrid::RouteGrid(short **data, int size)
 {
 	if (data == NULL)
 	{
@@ -22,14 +22,14 @@ RouteGrid::RouteGrid(int **data, int size)
 	this->standaloneElevationPointCount = 0;
 }
 
-bool RouteGrid::ValidateData(int lowestValue, int highestValue)
+bool RouteGrid::ValidateData(short lowestValue, short highestValue)
 {
 	// check that all values are in range
 	for(int i = 0; i <this->gridSize; i++)
 	{
 		for(int j = 0; j < this->gridSize; j++)
 		{
-			int v = this->data[i][j];
+			short v = this->data[i][j];
 
 			if (v < lowestValue || v > highestValue)
 			{
@@ -47,7 +47,7 @@ void RouteGrid::PrintData()
 	{
 		for(int j = 0; j < this->gridSize; j++)
 		{
-			int v = this->data[i][j];
+			short v = this->data[i][j];
 			printf("%d ", v);
 		}
 		printf("\n");
@@ -189,7 +189,7 @@ void RouteGrid::ReadySkiPath(List<int> *navPath)
 	this->totalPathsAnalyzed++;
 
 	int pathCount = navPath->Count();
-	int elevationDropValue = points[navPath->GetItem()]->elevation - points[navPath->GetLast()->GetItem()]->elevation;
+	short elevationDropValue = points[navPath->GetItem()]->elevation - points[navPath->GetLast()->GetItem()]->elevation;
 
 	// path is found, now apply business rules before the path is accepted/overrides 
 	// previously found paths.

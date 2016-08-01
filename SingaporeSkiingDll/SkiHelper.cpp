@@ -9,14 +9,14 @@
 #include <ctime>
 using namespace std;
 
-int ** SkiHelper::CreateSimpleTestData(int size)
+short ** SkiHelper::CreateSimpleTestData(int size)
 {
-	int **ptr = NULL;
+	short **ptr = NULL;
 
-	ptr = new int*[size];
+	ptr = new short*[size];
 	for(int i = 0; i < size; i++)
 	{
-		ptr[i] = new int[size];
+		ptr[i] = new short[size];
 	}
 
 	ptr[0][0] = 4;
@@ -43,7 +43,7 @@ int ** SkiHelper::CreateSimpleTestData(int size)
 }
 
 
-int ** SkiHelper::CreateTestData(int size)
+short ** SkiHelper::CreateTestData(int size)
 {
 	if (size == 4)
 	{
@@ -59,27 +59,26 @@ int ** SkiHelper::CreateTestData(int size)
 	}
 }
 
-void SkiHelper::DeleteTestData(int size, int **ptr)
+void SkiHelper::DeleteTestData(int size, short **ptr)
 {
 	if (ptr == NULL)
 	{
 		return;
 	}
 
-	ptr = new int*[size];
 	for(int i = 0; i < size; i++)
 	{
 		delete ptr[i];
 		ptr[i]=NULL;
 	}
 
-	delete ptr;
+	delete [] ptr;
 }
 
 
-int ** SkiHelper::CreateLargeTestData(int size)
+short ** SkiHelper::CreateLargeTestData(int size)
 {
-	int **ptr = NULL;
+	short **ptr = NULL;
 
 	// read data from file
 	string line;
@@ -87,7 +86,7 @@ int ** SkiHelper::CreateLargeTestData(int size)
 	if (inputFile.is_open())
 	{
 		int lineCount = 0;
-		vector<int> elems;
+		vector<short> elems;
 		while( getline(inputFile, line))
 		{
 			lineCount++;
@@ -112,10 +111,10 @@ int ** SkiHelper::CreateLargeTestData(int size)
 		}
 
 		// now create two dimensional array
-		ptr = new int*[size];
+		ptr = new short*[size];
 		for(int i = 0; i < size; i++)
 		{
-			ptr[i] = new int[size];
+			ptr[i] = new short[size];
 			for(int j=0; j < size; j++)
 			{
 				ptr[i][j] = elems[i*size+j];
@@ -125,7 +124,7 @@ int ** SkiHelper::CreateLargeTestData(int size)
 	return ptr;
 }
 
-void SkiHelper::GetTokensFromLine(string line, vector<int> &elems)
+void SkiHelper::GetTokensFromLine(string line, vector<short> &elems)
 {
 	stringstream ss(line);
 	string item;
@@ -145,4 +144,13 @@ const std::string SkiHelper::CurrentDateTime()
 	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", tstruct);
 
 	return buf;
+}
+
+void SkiHelper::Pause()
+{
+#ifdef __ACTIVATE_PAUSE__
+	char c;
+	cout << "Press key to continue...";
+	cin>>c;
+#endif
 }

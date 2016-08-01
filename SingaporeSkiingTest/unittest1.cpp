@@ -14,7 +14,7 @@ namespace SingaporeSkiingTest
 		TEST_METHOD(TestMethod1)
 		{
 			// Arrange
-			int **dataGrid = NULL;
+			short **dataGrid = NULL;
 			dataGrid = SkiHelper::CreateTestData(4);
 
 			RouteGrid *rg = new RouteGrid(dataGrid, 4);

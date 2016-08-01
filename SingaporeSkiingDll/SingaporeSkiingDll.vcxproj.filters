@@ -39,6 +39,12 @@
     <ClInclude Include="SkiHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SkiResort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkiHop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -57,6 +63,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SkiHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkiResort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

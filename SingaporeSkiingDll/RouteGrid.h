@@ -10,14 +10,14 @@ using namespace std;
 class RouteGrid
 {
 private:
-	int** data;
+	short** data;
 	int gridSize;
 
 	MountainPoint **points;
 	List<int> *navPath;
 
 	int prevNavPathCount;
-	int prevNavPathSteepValue;
+	short prevNavPathSteepValue;
 
 	int totalPathsAnalyzed;
 	int standaloneElevationPointCount;  
@@ -35,9 +35,9 @@ private:
 
 	void CreateEmptyElevationPointsArray();
 public:
-	__declspec(dllexport) RouteGrid(int **data, int size);
+	__declspec(dllexport) RouteGrid(short **data, int size);
 
-	__declspec(dllexport) bool ValidateData(int lowestValue, int highestValue);
+	__declspec(dllexport) bool ValidateData(short lowestValue, short highestValue);
 	__declspec(dllexport) void PrintData();
 
 	__declspec(dllexport) void CreateList();
