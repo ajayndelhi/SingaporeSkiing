@@ -71,5 +71,58 @@ namespace SingaporeSkiingTest
 			//// Assert
 			Assert::AreEqual<int>(0, itemCount, L"Item Count does not match");
 		}
+
+		TEST_METHOD(TestReadingNumbersLine1)
+		{
+			// Arrange
+			char buf[80];
+			strcpy(buf,"345 0 49 89 1500");
+			short intArray[5];
+
+			// Act
+			SkiHelper::GetTokensFromLine(buf, 5, intArray);
+
+			//// Assert
+			Assert::AreEqual<int>(345, intArray[0]);
+			Assert::AreEqual<int>(0, intArray[1]);
+			Assert::AreEqual<int>(49, intArray[2]);
+			Assert::AreEqual<int>(89, intArray[3]);
+			Assert::AreEqual<int>(1500, intArray[4]);
+		}
+
+		TEST_METHOD(TestReadingNumbersLine2)
+		{
+			// Arrange
+			char buf[80];
+			strcpy(buf,"345 0 49 89 1500");
+			short intArray[5];
+
+			// Act
+			SkiHelper::GetTokensFromLine(buf, 5, intArray);
+
+			//// Assert
+			Assert::AreEqual<int>(345, intArray[0]);
+			Assert::AreEqual<int>(0, intArray[1]);
+			Assert::AreEqual<int>(49, intArray[2]);
+			Assert::AreEqual<int>(89, intArray[3]);
+			Assert::AreEqual<int>(1500, intArray[4]);
+		}
+
+		TEST_METHOD(TestReadingNumbersLine3)
+		{
+			// Arrange
+			char buf[80];
+			strcpy(buf,"345 0 49 89 1500");
+			short intArray[4];
+
+			// Act
+			SkiHelper::GetTokensFromLine(buf, 4, intArray);
+
+			//// Assert
+			Assert::AreEqual<int>(345, intArray[0]);
+			Assert::AreEqual<int>(0, intArray[1]);
+			Assert::AreEqual<int>(49, intArray[2]);
+			Assert::AreEqual<int>(89, intArray[3]);
+		}
 	};
 }

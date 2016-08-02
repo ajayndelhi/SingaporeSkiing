@@ -9,6 +9,7 @@
 #include <ctime>
 using namespace std;
 
+#define MaxLineLen 5000
 short ** SkiHelper::CreateSimpleTestData(int size)
 {
 	short **ptr = NULL;
@@ -76,62 +77,85 @@ void SkiHelper::DeleteTestData(int size, short **ptr)
 }
 
 
-short ** SkiHelper::CreateLargeTestData(int size)
+short ** SkiHelper::CreateEmptyDataGrid(int size)
 {
 	short **ptr = NULL;
-
-	// read data from file
-	string line;
-	ifstream inputFile("C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt");
-	if (inputFile.is_open())
+	ptr = new short*[size];
+	for (int i = 0; i < size; i++)
 	{
-		int lineCount = 0;
-		vector<short> elems;
-		while( getline(inputFile, line))
+		ptr[i] = new short[size];
+		for (int j = 0; j < size; j++)
 		{
-			lineCount++;
-			/// skip first line
-			if (lineCount > 1)
-			{
-				//cout << lineCount << endl;
-				SkiHelper::GetTokensFromLine(line, elems);
-			}
-		}
-		inputFile.close();
-
-		// validate data
-		if (lineCount != size+1)
-		{
-			throw new std::exception("Invalid Input data");
-		}
-
-		if (elems.size() != size*size)
-		{
-			throw new std::exception("Invalid Input data");
-		}
-
-		// now create two dimensional array
-		ptr = new short*[size];
-		for(int i = 0; i < size; i++)
-		{
-			ptr[i] = new short[size];
-			for(int j=0; j < size; j++)
-			{
-				ptr[i][j] = elems[i*size+j];
-			}
+			ptr[i][j] = 0;
 		}
 	}
+
 	return ptr;
 }
 
-void SkiHelper::GetTokensFromLine(string line, vector<short> &elems)
+short ** SkiHelper::CreateLargeTestData(int size)
 {
-	stringstream ss(line);
-	string item;
-	while(getline(ss, item, ' '))
+	short **ptr = NULL;
+	char lineBuffer[MaxLineLen + 1];
+	FILE *fp;
+	errno_t err;
+	err = fopen_s(&fp, "C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt", "r");
+	if (err != 0)
 	{
-		elems.push_back(stoi(item));
+		cout << "Unable to read input file" << endl;
+		return NULL;
 	}
+
+	int lineCount = 0;
+
+	// now create two dimensional array
+	ptr = SkiHelper::CreateEmptyDataGrid(size);
+	
+	while (fgets(lineBuffer, MaxLineLen, fp))
+	{
+		lineCount++;
+		/// skip first line as it has count only
+		if (lineCount > 1)
+		{
+			SkiHelper::GetTokensFromLine(lineBuffer, size, ptr[lineCount - 2]);
+		}
+	}
+	fclose(fp);
+	fp = NULL;
+	return ptr;
+}
+
+void SkiHelper::GetTokensFromLine(char *buf, int maxTokens, short * const ptr)
+{
+	int j = 0;
+	char c;
+	
+	int si = 0;
+	int ei = 0;
+	for (si = 0, ei = 0; (c = buf[ei]) != '\0' && j < maxTokens; ei++)
+	{
+		if (c == ' ')
+		{
+			buf[ei] = '\0';
+			ptr[j++] = SkiHelper::atoi(buf + si);
+			si = ei + 1;
+		}
+	}
+
+	if (si < ei && buf[ei]=='\0' && j < maxTokens)
+	{
+		ptr[j] = SkiHelper::atoi(buf + si);
+	}
+}
+
+short SkiHelper::atoi(char *s)
+{
+	short value = 0;
+	for (int i = 0; *s != '\n' && *s != '\0'; s++, i++)
+	{
+		value = value * 10 + (*s - '0');
+	}
+	return value;
 }
 
 const std::string SkiHelper::CurrentDateTime()

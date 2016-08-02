@@ -66,7 +66,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		delete rg;
 		rg=NULL;
 		*/
-
+		
 		cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
 		SkiResort *rg = new SkiResort(dataGrid, dataSize);
 
@@ -75,7 +75,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		if (!dataStatus)
 		{
-			printf("Data is not valid\n");
+			cout << "Data is not valid" << endl;
 			return -1;
 		}
 
@@ -97,6 +97,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		SkiHelper::Pause();
 		cout << SkiHelper::CurrentDateTime() << " All Done" << endl;
+		
 	}
 	catch(std::exception &e)
 	{
