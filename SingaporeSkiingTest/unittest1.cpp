@@ -6,6 +6,9 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+#define SIMPLEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\SmallTestData.txt"
+#define LARGEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt"
+
 namespace SingaporeSkiingTest
 {		
 	TEST_CLASS(UnitTest1)
@@ -15,9 +18,11 @@ namespace SingaporeSkiingTest
 		{
 			// Arrange
 			short **dataGrid = NULL;
-			dataGrid = SkiHelper::CreateTestData(4);
+			int rowCount = 0;
+			int colCount = 0;
+			dataGrid = SkiHelper::CreateTestData(SIMPLEDATAFILE, &rowCount, &colCount);
 
-			RouteGrid *rg = new RouteGrid(dataGrid, 4);
+			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
 
 			// Act
 			bool dataStatus = rg->ValidateData(1, 9);

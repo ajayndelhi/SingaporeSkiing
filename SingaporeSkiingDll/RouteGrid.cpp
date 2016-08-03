@@ -5,7 +5,7 @@
 #include "coutRedirect.h"
 using namespace std;
 
-RouteGrid::RouteGrid(short **data, int size)
+RouteGrid::RouteGrid(short **data, int rowCount, int colCount)
 {
 	if (data == NULL)
 	{
@@ -13,7 +13,8 @@ RouteGrid::RouteGrid(short **data, int size)
 	}
 
 	this->data = data;
-	this->gridSize = size;
+	this->gridRows = rowCount;
+	this->gridCols = colCount;
 
 	this->points = NULL;
 	this->navPath = NULL;
@@ -25,9 +26,9 @@ RouteGrid::RouteGrid(short **data, int size)
 bool RouteGrid::ValidateData(short lowestValue, short highestValue)
 {
 	// check that all values are in range
-	for(int i = 0; i <this->gridSize; i++)
+	for(int i = 0; i <this->gridRows; i++)
 	{
-		for(int j = 0; j < this->gridSize; j++)
+		for(int j = 0; j < this->gridCols; j++)
 		{
 			short v = this->data[i][j];
 
@@ -43,9 +44,9 @@ bool RouteGrid::ValidateData(short lowestValue, short highestValue)
 
 void RouteGrid::PrintData()
 {
-	for(int i = 0; i <this->gridSize; i++)
+	for(int i = 0; i <this->gridRows; i++)
 	{
-		for(int j = 0; j < this->gridSize; j++)
+		for(int j = 0; j < this->gridCols; j++)
 		{
 			short v = this->data[i][j];
 			printf("%d ", v);
@@ -56,14 +57,14 @@ void RouteGrid::PrintData()
 
 void RouteGrid::CreateEmptyElevationPointsArray()
 {
-	int arraySize = this->gridSize * this->gridSize;
+	int arraySize = this->gridRows * this->gridCols;
 	this->points = new MountainPoint*[arraySize];
 
-	for (int r = 0; r < this->gridSize; r++)
+	for (int r = 0; r < this->gridRows; r++)
 	{
-		for (int c = 0; c < this->gridSize; c++)
+		for (int c = 0; c < this->gridCols; c++)
 		{
-			int runningIndex = (r*gridSize) + c;
+			int runningIndex = (r*gridCols) + c;
 			this->points[runningIndex] = MountainPoint::CreateMountainPoint(0, r, c, runningIndex, false);
 		}
 	}
@@ -71,14 +72,14 @@ void RouteGrid::CreateEmptyElevationPointsArray()
 
 void RouteGrid::CreateList()
 {
-	int arraySize = gridSize*gridSize;
+	int arraySize = this->gridRows * this->gridCols;
 	this->CreateEmptyElevationPointsArray();
 
-	for(int i = 0; i < this->gridSize; i++)
+	for(int i = 0; i < this->gridRows; i++)
 	{
-		for(int j = 0; j < this->gridSize; j++)
+		for(int j = 0; j < this->gridCols; j++)
 		{
-			int runningIndex = (i*gridSize)+j;
+			int runningIndex = (i*gridCols)+j;
 
 			// get object from array - as it has been already created;
 			MountainPoint *mp = this->points[runningIndex];
@@ -106,7 +107,7 @@ void RouteGrid::CreateList()
 
 void RouteGrid::StorePathIfValid(MountainPoint *mp, int tr, int tc)
 {
-	if (tr < 0 || tc < 0 || tr >= gridSize || tc >= gridSize)
+	if (tr < 0 || tc < 0 || tr >= gridRows || tc >= gridCols)
 	{
 		return;
 	}
@@ -116,7 +117,7 @@ void RouteGrid::StorePathIfValid(MountainPoint *mp, int tr, int tc)
 	if (toElevation < mp->elevation)
 	{
 		// calculate running index of toElevation
-		int runningIndex = (tr*gridSize)+tc;
+		int runningIndex = (tr*gridCols)+tc;
 		mp->StorePath(runningIndex);
 
 		// set IsReachableFromHigherElevation to true
@@ -136,7 +137,7 @@ void RouteGrid::DenormalizePaths()
 	this->prevNavPathCount = 0;
 	this->prevNavPathSteepValue = 0;
 	
-	for(int i = 0; i < (gridSize*gridSize); i++)
+	for(int i = 0; i < (gridRows*gridCols); i++)
 	{
 		// if the current point can be reached from some higher elevation, 
 		// we don't want to process current point, as it is already part of some other elevation point
@@ -261,7 +262,7 @@ void RouteGrid::UnWindNavPath(List<int> *navPath, MountainPoint *mp)
 
 void RouteGrid::Dump(MountainPoint *mountainPoints[])
 {
-	for(int i = 0; i < (gridSize*gridSize); i++)
+	for(int i = 0; i < (gridRows*gridCols); i++)
 	{
 		MountainPoint *currentPoint = mountainPoints[i];
 		int pathCount = currentPoint->GetPathCount();
@@ -292,7 +293,7 @@ RouteGrid::~RouteGrid()
 {
 	if (this->points != NULL)
 	{
-		int arraySize = gridSize*gridSize;
+		int arraySize = gridRows*gridCols;
 
 		for (int i = 0; i < arraySize; i++)
 		{

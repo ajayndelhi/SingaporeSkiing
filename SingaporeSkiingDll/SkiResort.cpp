@@ -8,7 +8,7 @@
 #include "SkiHelper.h"
 using namespace std;
 
-SkiResort::SkiResort(short **data, int size)
+SkiResort::SkiResort(short **data, int rows, int cols)
 {
 	if (data == NULL)
 	{
@@ -16,7 +16,8 @@ SkiResort::SkiResort(short **data, int size)
 	}
 
 	this->data = data;
-	this->gridSize = size;
+	this->gridRows = rows;
+	this->gridCols = cols;
 	this->totalPathsAnalyzed = 0;
 }
 
@@ -28,9 +29,9 @@ SkiResort::~SkiResort()
 bool SkiResort::ValidateData(short lowestValue, short highestValue)
 {
 	// check that all values are in range
-	for(int i = 0; i <this->gridSize; i++)
+	for(int i = 0; i <this->gridRows; i++)
 	{
-		for(int j = 0; j < this->gridSize; j++)
+		for(int j = 0; j < this->gridCols; j++)
 		{
 			short v = this->data[i][j];
 
@@ -52,15 +53,15 @@ void SkiResort::FindBestRoute()
 	this->skiPathVector.clear();
 
 	this->CachedNodes.clear();
-	this->CachedNodes.resize(this->gridSize * this->gridSize);
+	this->CachedNodes.resize(this->gridRows * this->gridCols);
 
 	SkiHop hop;
 
 	//int itemsProcessed = 0;
 
-	for(int r = 0; r < gridSize; r++)
+	for(int r = 0; r < gridRows; r++)
 	{
-		for(int c=0; c < gridSize; c++)
+		for(int c=0; c < gridCols; c++)
 		{
 			//itemsProcessed++;
 
@@ -323,7 +324,7 @@ bool SkiResort::IsReachableFromSorroundings(const SkiHop *currentPoint)
 
 SkiHop* SkiResort::CreateSkiHop(int r, int c)
 {
-	int runningIndex = r * this->gridSize + c;
+	int runningIndex = r * this->gridCols + c;
 
 	// first check if node exists on cached nodes
 	SkiHop * ptr = this->CachedNodes[runningIndex];
@@ -341,7 +342,7 @@ SkiHop* SkiResort::CreateSkiHop(int r, int c)
 
 bool SkiResort::IsMovePossible(const SkiHop *currentPoint, int tr, int tc)
 {
-	if (tr < 0 || tc < 0 || tr >= gridSize || tc >= gridSize)
+	if (tr < 0 || tc < 0 || tr >= gridRows || tc >= gridCols)
 	{
 		return false;
 	}
@@ -353,7 +354,7 @@ bool SkiResort::IsMovePossible(const SkiHop *currentPoint, int tr, int tc)
 
 bool SkiResort::IsReachable(const SkiHop *currentPoint, int tr, int tc)
 {
-	if (tr < 0 || tc < 0 || tr >= gridSize || tc >= gridSize)
+	if (tr < 0 || tc < 0 || tr >= gridRows || tc >= gridCols)
 	{
 		return false;
 	}

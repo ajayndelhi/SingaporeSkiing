@@ -15,15 +15,12 @@
 // sample walkthrough
 // https://msdn.microsoft.com/en-us/library/ms235636(v=vs.110).aspx
 
-#define SIMPLEDATASIZE 4
-#define COMPLEXDATASIZE 1000
 
-
+#define SIMPLEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\SmallTestData.txt"
+#define LARGEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	int dataSize = COMPLEXDATASIZE;
-
 	short **dataGrid = NULL;
 	char c;
 
@@ -32,72 +29,77 @@ int _tmain(int argc, _TCHAR* argv[])
 		SkiHelper::Pause();
 
 		cout << SkiHelper::CurrentDateTime() << " Reading input data..." << endl;
-		dataGrid = SkiHelper::CreateTestData(dataSize);
+		int rowCount = 0;
+		int colCount = 0;
+		dataGrid = SkiHelper::CreateTestData(SIMPLEDATAFILE, &rowCount, &colCount);
 
-		/*
-		cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
-		RouteGrid *rg = new RouteGrid(dataGrid, dataSize);
-
-		SkiHelper::Pause();
-
-		cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
-		bool dataStatus = rg->ValidateData(0, 1500);
-
-		if (!dataStatus)
 		{
-			printf("Data is not valid\n");
-			return -1;
+			cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
+			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
+
+			SkiHelper::Pause();
+
+			cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
+			bool dataStatus = rg->ValidateData(0, 1500);
+
+			if (!dataStatus)
+			{
+				printf("Data is not valid\n");
+				return -1;
+			}
+
+			SkiHelper::Pause();
+
+			// create nodes for the items in the array
+			cout << SkiHelper::CurrentDateTime() << " Creating graph list..." << endl;
+			rg->CreateList();
+
+			SkiHelper::Pause();
+
+			cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
+			rg->DenormalizePaths();
+
+			SkiHelper::Pause();
+
+			cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
+			delete rg;
+			rg = NULL;
 		}
-
-		SkiHelper::Pause();
-
-		// create nodes for the items in the array
-		cout << SkiHelper::CurrentDateTime() << " Creating graph list..." << endl;
-		rg->CreateList();
-
-		SkiHelper::Pause();
-
-		cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
-		rg->DenormalizePaths();
-
-		SkiHelper::Pause();
-
-		cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
-		delete rg;
-		rg=NULL;
-		*/
-		
-		cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
-		SkiResort *rg = new SkiResort(dataGrid, dataSize);
-
-		cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
-		bool dataStatus = rg->ValidateData(0, 1500);
-
-		if (!dataStatus)
-		{
-			cout << "Data is not valid" << endl;
-			return -1;
-		}
-
-		SkiHelper::Pause();
-
-		cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
-		rg->FindBestRoute();
-
-		SkiHelper::Pause();
-		cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
-		delete rg;
-		rg = NULL;
 	
+		/* *********************** */
+
+		{
+			cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
+			SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
+
+			cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
+			bool dataStatus = sr->ValidateData(0, 1500);
+
+			if (!dataStatus)
+			{
+				cout << "Data is not valid" << endl;
+				return -1;
+			}
+
+			SkiHelper::Pause();
+
+			cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
+			sr->FindBestRoute();
+
+			SkiHelper::Pause();
+			cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
+			delete sr;
+			sr = NULL;
+		}
+
 		SkiHelper::Pause();
 
 		cout << SkiHelper::CurrentDateTime() << " Deleting Test Data from memory..." << endl;
-		SkiHelper::DeleteTestData(dataSize, dataGrid);
+		SkiHelper::DeleteTestData(rowCount, colCount, dataGrid);
 		dataGrid = NULL;
 
 		SkiHelper::Pause();
 		cout << SkiHelper::CurrentDateTime() << " All Done" << endl;
-		
 	}
 	catch(std::exception &e)
 	{

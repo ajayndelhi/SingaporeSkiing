@@ -12,7 +12,8 @@ class SkiResort
 {
 private:
 	short** data;
-	int gridSize;
+	int gridRows;
+	int gridCols;
 
 	vector<const SkiHop *> skiPathVector;
 
@@ -40,7 +41,7 @@ private:
 	void DebugSkiPath();
 	void ClearCachedNodes();
 public:
-	__declspec(dllexport) SkiResort(short **data, int size);
+	__declspec(dllexport) SkiResort(short **data, int rows, int cols);
 	__declspec(dllexport) ~SkiResort();
 	__declspec(dllexport) bool ValidateData(short lowestValue, short highestValue);
 	__declspec(dllexport) void FindBestRoute();

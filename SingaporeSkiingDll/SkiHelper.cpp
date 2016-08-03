@@ -1,90 +1,74 @@
 #include "stdafx.h"
 #include <iostream>
 #include <fstream>
-#include <string>
-#include <vector>
-#include <sstream>
 #include "SkiHelper.h"
 #include "exception"
 #include <ctime>
 using namespace std;
 
-#define MaxLineLen 5000
-short ** SkiHelper::CreateSimpleTestData(int size)
-{
-	short **ptr = NULL;
+#define MaxFirstLineLen 80
 
-	ptr = new short*[size];
-	for(int i = 0; i < size; i++)
+short ** SkiHelper::CreateTestData(char *inputFile, int *rows, int *cols)
+{
+	FILE *fp;
+	errno_t err;
+	err = fopen_s(&fp, inputFile, "r");
+	if (err != 0)
 	{
-		ptr[i] = new short[size];
+		cout << "Unable to read input file" << endl;
+		return NULL;
 	}
 
-	ptr[0][0] = 4;
-	ptr[0][1] = 8;
-	ptr[0][2] = 7;
-	ptr[0][3] = 3;
-
-	ptr[1][0] = 2;
-	ptr[1][1] = 5;
-	ptr[1][2] = 9;
-	ptr[1][3] = 3;
-
-	ptr[2][0] = 6;
-	ptr[2][1] = 3;
-	ptr[2][2] = 2;
-	ptr[2][3] = 5;
-
-	ptr[3][0] = 4;
-	ptr[3][1] = 4;
-	ptr[3][2] = 1;
-	ptr[3][3] = 6;
-
-	return ptr;
-}
-
-
-short ** SkiHelper::CreateTestData(int size)
-{
-	if (size == 4)
+	char buffer[MaxFirstLineLen+1];
+	// read first line
+	if (fgets(buffer, MaxFirstLineLen, fp))
 	{
-		return SkiHelper::CreateSimpleTestData(size);
-	}
-	else if (size == 1000)
-	{
-		return SkiHelper::CreateLargeTestData(size);
+		short dimArray[2];
+		SkiHelper::GetTokensFromLine(buffer, 2, dimArray);
+
+		*rows = dimArray[0];
+		*cols = dimArray[1];
+
+		short **dataPtr = SkiHelper::CreateEmptyDataGrid(*rows, *cols);
+
+		SkiHelper::ReadTestData(fp, *rows, *cols, dataPtr);
+
+		fclose(fp);
+		fp = NULL;
+		return dataPtr;
 	}
 	else
 	{
-		throw new std::exception("Invalid data size.");
+		cout << "unable to read first line from input data file" << endl;
+		fclose(fp);
+		return NULL;
 	}
 }
 
-void SkiHelper::DeleteTestData(int size, short **ptr)
+void SkiHelper::DeleteTestData(int rows, int cols, short **ptr)
 {
 	if (ptr == NULL)
 	{
 		return;
 	}
 
-	for(int i = 0; i < size; i++)
+	for(int i = 0; i < rows; i++)
 	{
-		delete ptr[i];
+		delete [] ptr[i];
 		ptr[i]=NULL;
 	}
 
 	delete [] ptr;
 }
 
-
-short ** SkiHelper::CreateEmptyDataGrid(int size)
+short ** SkiHelper::CreateEmptyDataGrid(int rows, int cols)
 {
 	short **ptr = NULL;
-	ptr = new short*[size];
-	for (int i = 0; i < size; i++)
+	ptr = new short*[rows];
+	for (int i = 0; i < rows; i++)
 	{
-		ptr[i] = new short[size];
-		for (int j = 0; j < size; j++)
+		ptr[i] = new short[cols];
+		for (int j = 0; j < cols; j++)
 		{
 			ptr[i][j] = 0;
 		}
@@ -93,36 +77,20 @@ short ** SkiHelper::CreateEmptyDataGrid(int size)
 	return ptr;
 }
 
-short ** SkiHelper::CreateLargeTestData(int size)
+void SkiHelper::ReadTestData(FILE *fp, int rows, int cols, short **ptr)
 {
-	short **ptr = NULL;
-	char lineBuffer[MaxLineLen + 1];
-	FILE *fp;
-	errno_t err;
-	err = fopen_s(&fp, "C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt", "r");
-	if (err != 0)
+	int maxLineLen = cols * 5;
+	char *lineBuffer = (char *)calloc(maxLineLen+1, sizeof(char));
+
+	for (int lineCount = 0; fgets(lineBuffer, maxLineLen, fp) != NULL; lineCount++)
 	{
-		cout << "Unable to read input file" << endl;
-		return NULL;
+		SkiHelper::GetTokensFromLine(lineBuffer, cols, ptr[lineCount]);
 	}
 
-	int lineCount = 0;
-
-	// now create two dimensional array
-	ptr = SkiHelper::CreateEmptyDataGrid(size);
-	
-	while (fgets(lineBuffer, MaxLineLen, fp))
-	{
-		lineCount++;
-		/// skip first line as it has count only
-		if (lineCount > 1)
-		{
-			SkiHelper::GetTokensFromLine(lineBuffer, size, ptr[lineCount - 2]);
-		}
-	}
 	fclose(fp);
 	fp = NULL;
-	return ptr;
+
+	free(lineBuffer);
 }
 
 void SkiHelper::GetTokensFromLine(char *buf, int maxTokens, short * const ptr)

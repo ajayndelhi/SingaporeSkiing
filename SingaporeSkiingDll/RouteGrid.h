@@ -11,7 +11,8 @@ class RouteGrid
 {
 private:
 	short** data;
-	int gridSize;
+	int gridRows;
+	int gridCols;
 
 	MountainPoint **points;
 	List<int> *navPath;
@@ -35,7 +36,7 @@ private:
 
 	void CreateEmptyElevationPointsArray();
 public:
-	__declspec(dllexport) RouteGrid(short **data, int size);
+	__declspec(dllexport) RouteGrid(short **data, int rowCount, int colCount);
 
 	__declspec(dllexport) bool ValidateData(short lowestValue, short highestValue);
 	__declspec(dllexport) void PrintData();
