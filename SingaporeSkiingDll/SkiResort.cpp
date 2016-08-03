@@ -19,11 +19,24 @@ SkiResort::SkiResort(short **data, int rows, int cols)
 	this->gridRows = rows;
 	this->gridCols = cols;
 	this->totalPathsAnalyzed = 0;
+
+	this->CreateCachedNodesArray();
+}
+
+void SkiResort::CreateCachedNodesArray()
+{
+	int arraySize = this->gridRows * this->gridCols;
+	this->CachedNodes = new SkiHop*[arraySize];
+	for (int i = 0; i < arraySize; i++)
+	{
+		this->CachedNodes[i] = NULL;
+	}
 }
 
 SkiResort::~SkiResort()
 {
 	this->data = NULL;
+	this->ClearCachedNodes();
 }
 
 bool SkiResort::ValidateData(short lowestValue, short highestValue)
@@ -51,9 +64,6 @@ void SkiResort::FindBestRoute()
 	this->prevNavPathSteepValue = 0;
 
 	this->skiPathVectorIndex = 0;
-
-	this->CachedNodes.clear();
-	this->CachedNodes.resize(this->gridRows * this->gridCols);
 
 	SkiHop hop;
 
@@ -96,8 +106,6 @@ void SkiResort::FindBestRoute()
 	// this will output the final / result path 
 	// PersistSkiPath() writes to the buffer at resultBuffer
 	cout << this->resultBuffer.str();
-
-	this->ClearCachedNodes();
 }
 
 void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
@@ -356,18 +364,19 @@ bool SkiResort::IsReachable(const SkiHop *currentPoint, int tr, int tc)
 void SkiResort::ClearCachedNodes()
 {
 	int nodesDeleted = 0;
-	for(int x = 0; x< this->CachedNodes.size(); x++)
+	for (int x = 0; x < this->gridRows * this->gridCols; x++)
 	{
 		const SkiHop *toDel = this->CachedNodes[x];
 		if (toDel)
 		{
 			delete toDel;
 			toDel = NULL;
+			this->CachedNodes[x] = NULL;
 			nodesDeleted++;
 		}
 	}
 
-	this->CachedNodes.clear();
-
+	delete[] this->CachedNodes;
+	this->CachedNodes = NULL;
 	cout << "( " << nodesDeleted << " nodes deleted from cache. )" << endl;
 }

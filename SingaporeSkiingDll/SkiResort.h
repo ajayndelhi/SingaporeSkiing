@@ -25,7 +25,9 @@ private:
 	int skiPathVectorIndex;
 
 	// this vector caches nodes for optimization
-	vector<SkiHop *> CachedNodes;
+	//vector<SkiHop *> CachedNodes;
+	// moving away from vector
+	SkiHop **CachedNodes;
 
 	int prevNavPathCount;
 	short prevNavPathSteepValue;
@@ -46,6 +48,7 @@ private:
 	SkiHop* CreateSkiHop(int r, int c);
 	short CalculateElevationDrop(const SkiHop *first, const SkiHop *last);
 	void DebugSkiPath();
+	void CreateCachedNodesArray();
 	void ClearCachedNodes();
 public:
 	__declspec(dllexport) SkiResort(short **data, int rows, int cols);
