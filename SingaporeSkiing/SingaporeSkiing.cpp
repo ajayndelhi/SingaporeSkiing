@@ -31,8 +31,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		cout << SkiHelper::CurrentDateTime() << " Reading input data..." << endl;
 		int rowCount = 0;
 		int colCount = 0;
-		dataGrid = SkiHelper::CreateTestData(SIMPLEDATAFILE, &rowCount, &colCount);
+		dataGrid = SkiHelper::CreateTestData(LARGEDATAFILE, &rowCount, &colCount);
 
+		// if there is error in creating test data - return;
+		if (dataGrid == NULL)
+		{
+			return -1;
+		}
+
+		/*
 		{
 			cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
 			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
@@ -65,6 +72,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			delete rg;
 			rg = NULL;
 		}
+		*/
 	
 		/* *********************** */
 

@@ -98,21 +98,21 @@ void SkiHelper::GetTokensFromLine(char *buf, int maxTokens, short * const ptr)
 	int j = 0;
 	char c;
 	
-	int si = 0;
-	int ei = 0;
-	for (si = 0, ei = 0; (c = buf[ei]) != '\0' && j < maxTokens; ei++)
+	char *bufStart = buf;
+
+	for (bufStart = buf; *buf != '\0' && j < maxTokens; buf++)
 	{
-		if (c == ' ')
+		if (*buf == ' ')
 		{
-			buf[ei] = '\0';
-			ptr[j++] = SkiHelper::atoi(buf + si);
-			si = ei + 1;
+			*buf = '\0';
+			ptr[j++] = SkiHelper::atoi(bufStart);
+			bufStart = buf + 1;
 		}
 	}
 
-	if (si < ei && buf[ei]=='\0' && j < maxTokens)
+	if (bufStart < buf && *buf=='\0' && j < maxTokens)
 	{
-		ptr[j] = SkiHelper::atoi(buf + si);
+		ptr[j] = SkiHelper::atoi(bufStart);
 	}
 }
 

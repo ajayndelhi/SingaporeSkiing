@@ -7,6 +7,7 @@
 #include <vector>
 
 using namespace std;
+#define MAX_PATHS_FROM_ELEVATION 4
 
 class SkiResort
 {
@@ -32,7 +33,7 @@ private:
 	void ReadySkiPath();
 	void UnWindNavPath(const SkiHop *);
 
-	int FindAvailableHops(const SkiHop *, vector<SkiHop*> &);
+	int FindAvailableHops(const SkiHop *, SkiHop *availableHops[MAX_PATHS_FROM_ELEVATION]);
 	bool IsMovePossible(const SkiHop *currentPoint, int tr, int tc);
 	bool IsReachableFromSorroundings(const SkiHop *currentPoint);
 	bool IsReachable(const SkiHop *currentPoint, int tr, int tc);

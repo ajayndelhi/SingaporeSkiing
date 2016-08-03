@@ -105,7 +105,8 @@ void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
 	// we store ski route in this
 	this->skiPathVector.push_back(hop);
 
-	vector<SkiHop*> availableHops;
+	// there can be max 4 hops
+	SkiHop *availableHops[MAX_PATHS_FROM_ELEVATION];
 	int pathCount = this->FindAvailableHops(hop, availableHops);
 
 	// if no paths from current point - return;
@@ -243,42 +244,34 @@ void SkiResort::UnWindNavPath(const SkiHop *hop)
 	}
 }
 
-int SkiResort::FindAvailableHops(const SkiHop *currentPoint, vector<SkiHop *> &possibleHops)
+int SkiResort::FindAvailableHops(const SkiHop *currentPoint, SkiHop *possibleHops[MAX_PATHS_FROM_ELEVATION])
 {
 	int targetRow, targetCol;
 	int edgeCount = 0;
 
-	// north
-    targetRow = currentPoint->rowIndex-1;
-	targetCol = currentPoint->colIndex;
-	if (this->IsMovePossible(currentPoint, targetRow, targetCol))
-	{
-		possibleHops.push_back(this->CreateSkiHop(targetRow, targetCol));
-		edgeCount++;
-	}
+	int rowIndexes[] = { 
+		currentPoint->rowIndex - 1,  // north
+		currentPoint->rowIndex + 1,  // south
+		currentPoint->rowIndex,      // east
+		currentPoint->rowIndex       // west
+	};
 
-	targetRow = currentPoint->rowIndex+1;
-	targetCol = currentPoint->colIndex;
-	if (this->IsMovePossible(currentPoint, targetRow, targetCol))
-	{
-		possibleHops.push_back(this->CreateSkiHop(targetRow, targetCol));
-		edgeCount++;
-	}
+	int colIndexes[] = {
+		currentPoint->colIndex,          // north
+		currentPoint->colIndex,          // south
+		currentPoint->colIndex - 1,      // east
+		currentPoint->colIndex + 1       // west
+	};
 
-	targetRow = currentPoint->rowIndex;
-	targetCol = currentPoint->colIndex-1;
-	if (this->IsMovePossible(currentPoint, targetRow, targetCol))
+	for (int i = 0; i < MAX_PATHS_FROM_ELEVATION; i++)
 	{
-		possibleHops.push_back(this->CreateSkiHop(targetRow, targetCol));
-		edgeCount++;
-	}
-
-	targetRow = currentPoint->rowIndex;
-	targetCol = currentPoint->colIndex+1;
-	if (this->IsMovePossible(currentPoint, targetRow, targetCol))
-	{
-		possibleHops.push_back(this->CreateSkiHop(targetRow, targetCol));
-		edgeCount++;
+		targetRow = rowIndexes[i];
+		targetCol = colIndexes[i];
+		if (this->IsMovePossible(currentPoint, targetRow, targetCol))
+		{
+			possibleHops[edgeCount] = this->CreateSkiHop(targetRow, targetCol);
+			edgeCount++;
+		}
 	}
 
 	return edgeCount;
@@ -288,35 +281,26 @@ int SkiResort::FindAvailableHops(const SkiHop *currentPoint, vector<SkiHop *> &p
 // process it separately, as it is part of higher points and will be covered from higher points;
 bool SkiResort::IsReachableFromSorroundings(const SkiHop *currentPoint)
 {
-	int targetRow, targetCol;
+	int rowIndexes[] = {
+		currentPoint->rowIndex - 1,  // north
+		currentPoint->rowIndex + 1,  // south
+		currentPoint->rowIndex,      // east
+		currentPoint->rowIndex       // west
+	};
 
-	// north
-    targetRow = currentPoint->rowIndex-1;
-	targetCol = currentPoint->colIndex;
-	if (this->IsReachable(currentPoint, targetRow, targetCol))
-	{
-		return true;
-	}
+	int colIndexes[] = {
+		currentPoint->colIndex,          // north
+		currentPoint->colIndex,          // south
+		currentPoint->colIndex - 1,      // east
+		currentPoint->colIndex + 1       // west
+	};
 
-	targetRow = currentPoint->rowIndex+1;
-	targetCol = currentPoint->colIndex;
-	if (this->IsReachable(currentPoint, targetRow, targetCol))
+	for (int i = 0; i < MAX_PATHS_FROM_ELEVATION; i++)
 	{
-		return true;
-	}
-
-	targetRow = currentPoint->rowIndex;
-	targetCol = currentPoint->colIndex-1;
-	if (this->IsReachable(currentPoint, targetRow, targetCol))
-	{
-		return true;
-	}
-
-	targetRow = currentPoint->rowIndex;
-	targetCol = currentPoint->colIndex+1;
-	if (this->IsReachable(currentPoint, targetRow, targetCol))
-	{
-		return true;
+		if (this->IsReachable(currentPoint, rowIndexes[i], colIndexes[i]))
+		{
+			return true;
+		}
 	}
 
 	return false;
@@ -330,14 +314,15 @@ SkiHop* SkiResort::CreateSkiHop(int r, int c)
 	SkiHop * ptr = this->CachedNodes[runningIndex];
 	if (ptr && ptr->rowIndex == r && ptr->colIndex == c)
 	{
-		//cout << "Node retrieved from cache...[" << r << "][" << c << "]==" << this->CachedNodes[i]->elevation << endl;
-		return ptr;
+		;
 	}
-
-	// if not found, create one and cache it for future use
-	SkiHop *hop = SkiHop::Create(r, c, this->data[r][c]);
-	this->CachedNodes[runningIndex] = hop;
-	return hop;
+	else
+	{
+		// if not found, create one and cache it for future use
+		ptr = SkiHop::Create(r, c, this->data[r][c]);
+		this->CachedNodes[runningIndex] = ptr;
+	}
+	return ptr;
 }
 
 bool SkiResort::IsMovePossible(const SkiHop *currentPoint, int tr, int tc)
