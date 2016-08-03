@@ -9,6 +9,8 @@
 using namespace std;
 #define MAX_PATHS_FROM_ELEVATION 4
 
+// setting some practical limit for performance
+#define MAX_SKI_PATH_SIZE 100
 class SkiResort
 {
 private:
@@ -16,7 +18,11 @@ private:
 	int gridRows;
 	int gridCols;
 
-	vector<const SkiHop *> skiPathVector;
+	// using array here to store the paths - 
+	// this though sets a limit, but it is much better performance wise
+	// when compared to using vector here;
+	const SkiHop *skiPathVector[MAX_SKI_PATH_SIZE];
+	int skiPathVectorIndex;
 
 	// this vector caches nodes for optimization
 	vector<SkiHop *> CachedNodes;

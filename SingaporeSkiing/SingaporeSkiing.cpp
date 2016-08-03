@@ -111,7 +111,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	catch(std::exception &e)
 	{
-		std::cout << "an error occured\n";
+		std::cout << "an error occured" << endl;
 	}
 }
 

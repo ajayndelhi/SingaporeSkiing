@@ -50,7 +50,7 @@ void SkiResort::FindBestRoute()
 	this->prevNavPathCount = 0;
 	this->prevNavPathSteepValue = 0;
 
-	this->skiPathVector.clear();
+	this->skiPathVectorIndex = 0;
 
 	this->CachedNodes.clear();
 	this->CachedNodes.resize(this->gridRows * this->gridCols);
@@ -84,7 +84,7 @@ void SkiResort::FindBestRoute()
 				// note we can't delete hop as it is on stack
 				// hence only unwind all nodes after hop
 				this->UnWindNavPath(&hop);  
-				this->skiPathVector.clear();
+				this->skiPathVectorIndex = 0;
 			}
 		}
 	}
@@ -103,7 +103,15 @@ void SkiResort::FindBestRoute()
 void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
 {
 	// we store ski route in this
-	this->skiPathVector.push_back(hop);
+	if (this->skiPathVectorIndex < MAX_SKI_PATH_SIZE - 1)
+	{
+		this->skiPathVector[this->skiPathVectorIndex++] = hop;
+	}
+	else
+	{
+		cout << "Number of Ski Paths exceeded its max size." << endl;
+		throw new std::exception("Number of Ski Paths exceeded its max size.");
+	}
 
 	// there can be max 4 hops
 	SkiHop *availableHops[MAX_PATHS_FROM_ELEVATION];
@@ -124,7 +132,7 @@ void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
 
 void SkiResort::ReadySkiPath()
 {
-	int pathCount = this->skiPathVector.size();
+	int pathCount = this->skiPathVectorIndex;
 	// path is found, now apply business rules before the path is accepted/overrides 
 	// previously found paths.
 
@@ -161,7 +169,7 @@ void SkiResort::ReadySkiPath()
 // this way, resultBuffer always has latest and greatest ski path;
 void SkiResort::PersistSkiPath()
 {
-	int pathCount = this->skiPathVector.size();
+	int pathCount = this->skiPathVectorIndex;
 	short elevationDropValue = this->CalculateElevationDrop(this->skiPathVector[0], this->skiPathVector[pathCount-1]);
 
 	if (pathCount == 0)
@@ -194,12 +202,7 @@ void SkiResort::PersistSkiPath()
 
 void SkiResort::DebugSkiPath()
 {
-	int pathCount = this->skiPathVector.size();
-
-	if (pathCount == 0)
-	{
-		return;
-	}
+	int pathCount = this->skiPathVectorIndex;
 
 	for(int i = 0; i<pathCount;i++)
 	{
@@ -224,7 +227,8 @@ short SkiResort::CalculateElevationDrop(const SkiHop *firstPoint, const SkiHop *
 // unwind upto hop; (keep hop)
 void SkiResort::UnWindNavPath(const SkiHop *hop)
 {
-	int pathCount = this->skiPathVector.size();
+	//int pathCount = this->skiPathVector.size();
+	int pathCount = this->skiPathVectorIndex;
 	for(int x = pathCount-1; x >=0; x--)
 	{
 		const SkiHop *ptr = this->skiPathVector[x];
@@ -240,7 +244,7 @@ void SkiResort::UnWindNavPath(const SkiHop *hop)
 		//delete toDel;
 		//toDel = NULL;
 
-		this->skiPathVector.pop_back();
+		this->skiPathVectorIndex--;
 	}
 }
 
