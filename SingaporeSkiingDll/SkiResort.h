@@ -1,10 +1,8 @@
 #include "stdafx.h"
-#include "List.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 #include "SkiHop.h"
-#include <vector>
 
 using namespace std;
 #define MAX_PATHS_FROM_ELEVATION 4
@@ -22,21 +20,23 @@ private:
 	// this though sets a limit, but it is much better performance wise
 	// when compared to using vector here;
 	const SkiHop *skiPathVector[MAX_SKI_PATH_SIZE];
-	int skiPathVectorIndex;
+	short skiPathVectorIndex;
 
 	// this vector caches nodes for optimization
 	//vector<SkiHop *> CachedNodes;
 	// moving away from vector
 	SkiHop **CachedNodes;
 
-	int prevNavPathCount;
-	short prevNavPathSteepValue;
+	// Captures the best ski path
+	short bestSkiPathCount;
+	short bestSkiPathSteepValue;
+	// this array stores the index value in CachedNodes;
+	int bestSkiPath[MAX_SKI_PATH_SIZE];
 
 	int totalPathsAnalyzed;
 
-	std::stringstream resultBuffer;
-
 	void ProcessElevationPoint(SkiHop * const hop);
+	
 	void PersistSkiPath();
 	void ReadySkiPath();
 	void UnWindNavPath(SkiHop *, int cachedSkiPathVectorIndex);
@@ -51,10 +51,17 @@ private:
 	void CreateCachedNodesArray();
 	void ClearCachedNodes();
 	bool IsNavigatingMakeSense(const SkiHop *);
+	int GetRunningIndex(int row, int col);
 public:
 	__declspec(dllexport) SkiResort(short **data, int rows, int cols);
 	__declspec(dllexport) ~SkiResort();
 	__declspec(dllexport) bool ValidateData(short lowestValue, short highestValue);
 	__declspec(dllexport) void FindBestRoute();
+	__declspec(dllexport) void PrintBestSkiPath(ostream &);
+
+	// methods added for unit testing
+	__declspec(dllexport) short GetBestSkiPathCount();
+	__declspec(dllexport) short GetBestSkiPathElevation();
+	__declspec(dllexport) void GetBestSkiPath(short *paths);
 protected:
 };

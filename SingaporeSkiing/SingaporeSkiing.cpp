@@ -1,8 +1,8 @@
+// copyright: Ajay Aggarwal
 // SingaporeSkiing.cpp : Defines the entry point for the console application.
 //
 
 #include "stdafx.h"
-#include "RouteGrid.h"
 #include "SkiHelper.h"
 #include "exception"
 #include <iostream>
@@ -29,8 +29,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	try
 	{
-		SkiHelper::Pause();
-
 		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Reading input data..." << endl;
 		int rowCount = 0;
 		int colCount = 0;
@@ -42,73 +40,30 @@ int _tmain(int argc, _TCHAR* argv[])
 			return -1;
 		}
 		
-		/*
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating class object..." << endl;
+		SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
+
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Validating input data values..." << endl;
+		bool dataStatus = sr->ValidateData(0, 1500);
+
+		if (!dataStatus)
 		{
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating class object..." << endl;
-			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
-
-			SkiHelper::Pause();
-
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Validating input data values..." << endl;
-			bool dataStatus = rg->ValidateData(0, 1500);
-
-			if (!dataStatus)
-			{
-				printf("Data is not valid\n");
-				return -1;
-			}
-
-			SkiHelper::Pause();
-
-			// create nodes for the items in the array
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating graph list..." << endl;
-			rg->CreateList();
-
-			SkiHelper::Pause();
-
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Finding Best Path..." << endl;
-			rg->DenormalizePaths();
-
-			SkiHelper::Pause();
-
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Releasing Memory..." << endl;
-			delete rg;
-			rg = NULL;
-		}
-		*/
-
-		/* *********************** */
-		{
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating class object..." << endl;
-			SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
-
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Validating input data values..." << endl;
-			bool dataStatus = sr->ValidateData(0, 1500);
-
-			if (!dataStatus)
-			{
-				cout << "Data is not valid" << endl;
-				return -1;
-			}
-
-			SkiHelper::Pause();
-
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Finding Best Path..." << endl;
-			sr->FindBestRoute();
-
-			SkiHelper::Pause();
-			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Releasing Memory..." << endl;
-			delete sr;
-			sr = NULL;
+			cout << "Data is not valid" << endl;
+			return -1;
 		}
 
-		SkiHelper::Pause();
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Finding Best Path..." << endl;
+		sr->FindBestRoute();
+		sr->PrintBestSkiPath(cout);
+
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Releasing Memory..." << endl;
+		delete sr;
+		sr = NULL;
 
 		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Deleting Test Data from memory..." << endl;
 		SkiHelper::DeleteTestData(rowCount, colCount, dataGrid);
 		dataGrid = NULL;
 
-		SkiHelper::Pause();
 		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " All Done" << endl;
 	}
 	catch(std::exception &e)

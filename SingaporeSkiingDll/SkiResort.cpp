@@ -2,9 +2,7 @@
 #include "SkiResort.h"
 #include <iostream>
 #include "exception"
-#include "coutRedirect.h"
 #include "SkiHop.h"
-#include <vector>
 #include "SkiHelper.h"
 using namespace std;
 
@@ -21,6 +19,13 @@ SkiResort::SkiResort(short **data, int rows, int cols)
 	this->totalPathsAnalyzed = 0;
 
 	this->CreateCachedNodesArray();
+
+	this->bestSkiPathCount = 0;
+	this->bestSkiPathSteepValue = 0;
+	for (int i = 0; i < MAX_SKI_PATH_SIZE; i++)
+	{
+		this->bestSkiPath[i] = 0;
+	}
 }
 
 void SkiResort::CreateCachedNodesArray()
@@ -60,8 +65,8 @@ bool SkiResort::ValidateData(short lowestValue, short highestValue)
 
 void SkiResort::FindBestRoute()
 {
-	this->prevNavPathCount = 0;
-	this->prevNavPathSteepValue = 0;
+	this->bestSkiPathCount = 0;
+	this->bestSkiPathSteepValue = 0;
 	this->skiPathVectorIndex = 0;
 
 	SkiHop hop;
@@ -71,14 +76,15 @@ void SkiResort::FindBestRoute()
 		{
 			hop.rowIndex = r;
 			hop.colIndex = c;
-			hop.elevation = this->data[r][c];;
+			hop.elevation = this->data[r][c];
 			hop.maxPathCount = -1;
-
-			//std::cout << hop;
 
 			if (this->IsReachableFromSorroundings(&hop) == false)
 			{
-				this->ProcessElevationPoint(&hop);
+				SkiHop *ptr = SkiHop::Create(r, c, this->data[r][c]);
+				this->CachedNodes[this->GetRunningIndex(r,c)] = ptr;
+
+				this->ProcessElevationPoint(ptr);
 				this->ReadySkiPath();
 				this->skiPathVectorIndex = 0;
 			}
@@ -88,10 +94,6 @@ void SkiResort::FindBestRoute()
 	cout << "===========================================================" << endl;
 	cout << "  Total " << this->totalPathsAnalyzed << " paths Analyzed" << endl;
 	cout << "===========================================================" << endl;
-
-	// this will output the final / result path 
-	// PersistSkiPath() writes to the buffer at resultBuffer
-	cout << this->resultBuffer.str();
 }
 
 void SkiResort::ProcessElevationPoint(SkiHop * const hop)
@@ -149,7 +151,7 @@ void SkiResort::ReadySkiPath()
 
 	// path is found, now apply business rules before the path is accepted/overrides 
 	// previously found paths.
-	if (pathCount < this->prevNavPathCount)
+	if (pathCount < this->bestSkiPathCount)
 	{
 		return;
 	}
@@ -157,49 +159,63 @@ void SkiResort::ReadySkiPath()
 	short elevationDropValue = this->CalculateElevationDrop(this->skiPathVector[0], this->skiPathVector[pathCount-1]);
 
 	// compare with best values so far - if current values beat best so far, take current and move on.
-	if (pathCount > this->prevNavPathCount || 
-		(pathCount == this->prevNavPathCount && elevationDropValue > this->prevNavPathSteepValue))
+	if (pathCount > this->bestSkiPathCount || 
+		(pathCount == this->bestSkiPathCount && elevationDropValue > this->bestSkiPathSteepValue))
 	{
 		this->PersistSkiPath();
 		// save best values so far
-		this->prevNavPathCount = pathCount;
-		this->prevNavPathSteepValue = elevationDropValue;
+		this->bestSkiPathCount = pathCount;
+		this->bestSkiPathSteepValue = elevationDropValue;
+	}
+}
+
+void SkiResort::PersistSkiPath()
+{
+	if (this->skiPathVectorIndex == 0)
+	{
+		return;
+	}
+
+	this->bestSkiPathCount = this->skiPathVectorIndex;
+	this->bestSkiPathSteepValue = this->CalculateElevationDrop(this->skiPathVector[0], this->skiPathVector[this->bestSkiPathCount - 1]);
+
+	for (int i = 0; i<this->bestSkiPathCount; i++)
+	{
+		const SkiHop *mp = this->skiPathVector[i];
+		this->bestSkiPath[i] = this->GetRunningIndex(mp->rowIndex, mp->colIndex);
 	}
 }
 
 // write path to resultBuffer by clearing any previous contents of the buffer
 // this way, resultBuffer always has latest and greatest ski path;
-void SkiResort::PersistSkiPath()
+void SkiResort::PrintBestSkiPath(ostream &os)
 {
-	int pathCount = this->skiPathVectorIndex;
-	short elevationDropValue = this->CalculateElevationDrop(this->skiPathVector[0], this->skiPathVector[pathCount-1]);
-
-	if (pathCount == 0)
+	if (this->bestSkiPathCount == 0)
 	{
+		os << "No Path found";
 		return;
 	}
 
-	// clear previous contents of result buffer
-	this->resultBuffer.clear();
-	this->resultBuffer.str(std::string());
+	int pathCount = this->bestSkiPathCount;
+	short elevationDropValue = this->bestSkiPathSteepValue;
 
-	// this will redirect cout to buffer and on exit of (), will reset cout to as before
-	// cout_redirect coutredir(this->resultBuffer.rdbuf());
-
-	this->resultBuffer << "   *** Path Count = " << pathCount << "; Elevation Drop = " << elevationDropValue << "; ***" << endl;
+	os << "   *** Path Count = " << pathCount << "; Elevation Drop = " << elevationDropValue << "; ***" << endl;
 
 	for(int i = 0; i<pathCount;i++)
 	{
-		const SkiHop *mp =  this->skiPathVector[i];
+		const SkiHop *mp = this->CachedNodes[this->bestSkiPath[i]];
 		//this->resultBuffer << "[" << mp->rowIndex << "," << mp->colIndex << "]" << mp->elevation;
-		this->resultBuffer << mp->elevation;
-		if (i+1 < pathCount)
+		if (mp)
 		{
-			this->resultBuffer << "-";
+			os << mp->elevation;
+			if (i + 1 < pathCount)
+			{
+				os << "-";
+			}
 		}
 	}
 
-	this->resultBuffer << endl << endl ;
+	os << endl << endl ;
 }
 
 void SkiResort::DebugSkiPath()
@@ -302,7 +318,7 @@ bool SkiResort::IsReachableFromSorroundings(const SkiHop *currentPoint)
 
 SkiHop* SkiResort::CreateSkiHop(int r, int c)
 {
-	int runningIndex = r * this->gridCols + c;
+	int runningIndex = this->GetRunningIndex(r,c);
 
 	// first check if node exists on cached nodes
 	SkiHop * ptr = this->CachedNodes[runningIndex];
@@ -373,10 +389,42 @@ bool SkiResort::IsNavigatingMakeSense(const SkiHop *hop)
 	// Also, note that if we are checking >=, this is because even if the path
 	// count is going to be same, the exploration from hop might beat on elevation drop;
 	if (hop->maxPathCount == -1 ||
-		this->skiPathVectorIndex + hop->maxPathCount >= this->prevNavPathCount)
+		this->skiPathVectorIndex + hop->maxPathCount >= this->bestSkiPathCount)
 	{
 		return true;
 	}
 
 	return false;
+}
+
+short SkiResort::GetBestSkiPathCount()
+{
+	return this->bestSkiPathCount;
+}
+short SkiResort::GetBestSkiPathElevation()
+{
+	return this->bestSkiPathSteepValue;
+}
+
+// caller is responsible for supplying array of right size.
+void SkiResort::GetBestSkiPath(short *paths)
+{
+	if (paths == NULL)
+	{
+		return;
+	}
+
+	for (int i = 0; i < this->bestSkiPathCount; i++)
+	{
+		const SkiHop *mp = this->CachedNodes[this->bestSkiPath[i]];
+		if (mp)
+		{
+			*(paths + i) = mp->elevation;
+		}
+	}
+}
+
+int SkiResort::GetRunningIndex(int row, int col)
+{
+	return row * this->gridCols + col;
 }

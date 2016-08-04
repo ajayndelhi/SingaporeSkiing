@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "RouteGrid.h"
 #include "SkiHelper.h"
-#include "List.h"
+#include "SkiResort.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -14,67 +13,71 @@ namespace SingaporeSkiingTest
 	TEST_CLASS(UnitTest1)
 	{
 	public:
-		TEST_METHOD(TestMethod1)
+		TEST_METHOD(TestSingaporeSkiingSimplePath)
 		{
 			// Arrange
 			short **dataGrid = NULL;
 			int rowCount = 0;
 			int colCount = 0;
 			dataGrid = SkiHelper::CreateTestData(SIMPLEDATAFILE, &rowCount, &colCount);
-
-			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
+			SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
 
 			// Act
-			bool dataStatus = rg->ValidateData(1, 9);
+			bool dataStatus = sr->ValidateData(1, 9);
+			sr->FindBestRoute();
 
 			// Assert
 			Assert::IsTrue(dataStatus, L"Data Grid has numbers out of range");
+			Assert::AreEqual<int>(5, sr->GetBestSkiPathCount(), L"Best ski path count is not correct.");
+			Assert::AreEqual<int>(8, sr->GetBestSkiPathElevation(), L"Best ski path elevation is not correct.");
+
+			short *array = new short[sr->GetBestSkiPathCount()];
+			sr->GetBestSkiPath(array);
+			Assert::AreEqual<int>(9, *(array + 0), L"Invalid path");
+			Assert::AreEqual<int>(5, *(array + 1), L"Invalid path");
+			Assert::AreEqual<int>(3, *(array + 2), L"Invalid path");
+			Assert::AreEqual<int>(2, *(array + 3), L"Invalid path");
+			Assert::AreEqual<int>(1, *(array + 4), L"Invalid path");
+			delete[] array;
+			array = NULL;
+
+			// Cleanup
+			delete sr;
+			sr = NULL;
+			SkiHelper::DeleteTestData(rowCount, colCount, dataGrid);
+			dataGrid = NULL;
 		}
 
-		TEST_METHOD(TestList)
+		TEST_METHOD(TestSingaporeSkiingComplexPath)
 		{
 			// Arrange
-			List<int> *myIntList = new List<int>(10);
-			myIntList->Add(15);
-			myIntList->Add(25);
-			myIntList->Add(5);
-			myIntList->Add(8);
-			myIntList->Add(19);
+			short **dataGrid = NULL;
+			int rowCount = 0;
+			int colCount = 0;
+			dataGrid = SkiHelper::CreateTestData(LARGEDATAFILE, &rowCount, &colCount);
+			SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
 
 			// Act
-			int itemCount = myIntList->Count();
+			bool dataStatus = sr->ValidateData(0, 1500);
+			sr->FindBestRoute();
 
-			//// Assert
-			Assert::AreEqual<int>(6, itemCount, L"Item Count does not match");
-		}
+			// Assert
+			Assert::IsTrue(dataStatus, L"Data Grid has numbers out of range");
+			Assert::AreEqual<int>(15, sr->GetBestSkiPathCount(), L"Best ski path count is not correct.");
+			Assert::AreEqual<int>(1422, sr->GetBestSkiPathElevation(), L"Best ski path elevation is not correct.");
 
-		TEST_METHOD(TestList2)
-		{
-			// Arrange
-			List<int> *myIntList = new List<int>();
-			myIntList->Add(15);
-			myIntList->Add(25);
-			myIntList->Add(5);
-			myIntList->Add(8);
-			myIntList->Add(19);
+			short *array = new short[sr->GetBestSkiPathCount()];
+			sr->GetBestSkiPath(array);
+			Assert::AreEqual<int>(1422, *(array + 0), L"Invalid path");
+			Assert::AreEqual<int>(0, *(array + sr->GetBestSkiPathCount() - 1), L"Invalid path");
+			delete[] array;
+			array = NULL;
 
-			// Act
-			int itemCount = myIntList->Count();
-
-			//// Assert
-			Assert::AreEqual<int>(5, itemCount, L"Item Count does not match");
-		}
-
-		TEST_METHOD(TestList3)
-		{
-			// Arrange
-			List<int> *myIntList = new List<int>();
-
-			// Act
-			int itemCount = myIntList->Count();
-
-			//// Assert
-			Assert::AreEqual<int>(0, itemCount, L"Item Count does not match");
+			// Cleanup
+			delete sr;
+			sr = NULL;
+			SkiHelper::DeleteTestData(rowCount, colCount, dataGrid);
+			dataGrid = NULL;
 		}
 
 		TEST_METHOD(TestReadingNumbersLine1)
