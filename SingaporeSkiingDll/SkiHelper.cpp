@@ -126,15 +126,11 @@ short SkiHelper::atoi(char *s)
 	return value;
 }
 
-const std::string SkiHelper::CurrentDateTime()
+const char * SkiHelper::CurrentDateTime(char *buf, int size)
 {
-	time_t     now = time(0);
-	struct tm  *tstruct = new struct tm;
-	char       buf[80];
-
-	localtime_s(tstruct, &now);
-	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", tstruct);
-
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	sprintf_s(buf, size, "%d-%02d-%02d %02d:%02d:%02d.%03d", st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, st.wMilliseconds);
 	return buf;
 }
 

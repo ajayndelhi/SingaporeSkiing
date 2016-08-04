@@ -8,16 +8,23 @@ using  namespace std;
 class SkiHop
 {
 public:
-
 	int rowIndex;
 	int colIndex;
 	short elevation;
+	short maxPathCount;
 
+	SkiHop();
 	~SkiHop();
 
 	static SkiHop* Create(int r, int c, short elevation);
 	friend std::ostream& operator<<(std::ostream&, const SkiHop &);
 };
+
+SkiHop::SkiHop()
+{
+	this->rowIndex = this->colIndex = this->elevation = 0;
+	this->maxPathCount = -1;
+}
 
 SkiHop::~SkiHop()
 {

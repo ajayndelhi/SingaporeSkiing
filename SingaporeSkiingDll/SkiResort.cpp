@@ -62,27 +62,17 @@ void SkiResort::FindBestRoute()
 {
 	this->prevNavPathCount = 0;
 	this->prevNavPathSteepValue = 0;
-
 	this->skiPathVectorIndex = 0;
 
 	SkiHop hop;
-
-	//int itemsProcessed = 0;
-
 	for(int r = 0; r < gridRows; r++)
 	{
 		for(int c=0; c < gridCols; c++)
 		{
-			//itemsProcessed++;
-
-			//if (itemsProcessed % 50000 == 0)
-			//{
-			//	cout << SkiHelper::CurrentDateTime() << " " << itemsProcessed << " items processed. (cache size: " << this->CachedNodes.size() << ")" << endl;
-			//}
-
 			hop.rowIndex = r;
 			hop.colIndex = c;
 			hop.elevation = this->data[r][c];;
+			hop.maxPathCount = -1;
 
 			//std::cout << hop;
 
@@ -90,10 +80,6 @@ void SkiResort::FindBestRoute()
 			{
 				this->ProcessElevationPoint(&hop);
 				this->ReadySkiPath();
-
-				// note we can't delete hop as it is on stack
-				// hence only unwind all nodes after hop
-				this->UnWindNavPath(&hop);  
 				this->skiPathVectorIndex = 0;
 			}
 		}
@@ -108,8 +94,13 @@ void SkiResort::FindBestRoute()
 	cout << this->resultBuffer.str();
 }
 
-void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
+void SkiResort::ProcessElevationPoint(SkiHop * const hop)
 {
+	if (this->IsNavigatingMakeSense(hop) == false)
+	{
+		return;
+	}
+
 	// we store ski route in this
 	if (this->skiPathVectorIndex < MAX_SKI_PATH_SIZE - 1)
 	{
@@ -125,6 +116,9 @@ void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
 	SkiHop *availableHops[MAX_PATHS_FROM_ELEVATION];
 	int pathCount = this->FindAvailableHops(hop, availableHops);
 
+	// cache skiPathVectorIndex here so as to rewind into the skiPathVector
+	int cachedSkiPathVectorIndex = this->skiPathVectorIndex;
+
 	// if no paths from current point - return;
 	for (int x = 0; x < pathCount; x++)
 	{
@@ -133,7 +127,7 @@ void SkiResort::ProcessElevationPoint(const SkiHop * const hop)
 		{
 			// dump navPaths and then rewind upto current point
 			this->ReadySkiPath();
-			this->UnWindNavPath(hop);
+			this->UnWindNavPath(hop, cachedSkiPathVectorIndex);
 		}
 	}
 }
@@ -225,7 +219,6 @@ void SkiResort::DebugSkiPath()
 	cout << endl ;
 }
 
-
 short SkiResort::CalculateElevationDrop(const SkiHop *firstPoint, const SkiHop *lastPoint)
 {
 	return this->data[firstPoint->rowIndex][firstPoint->colIndex] - 
@@ -233,27 +226,16 @@ short SkiResort::CalculateElevationDrop(const SkiHop *firstPoint, const SkiHop *
 }
 
 // unwind upto hop; (keep hop)
-void SkiResort::UnWindNavPath(const SkiHop *hop)
+// while unwinding, also store the hop points available (max)
+// from hop
+void SkiResort::UnWindNavPath(SkiHop *hop, int cachedSkiPathVectorIndex)
 {
-	//int pathCount = this->skiPathVector.size();
-	int pathCount = this->skiPathVectorIndex;
-	for(int x = pathCount-1; x >=0; x--)
+	short currentPathCountFromHop = this->skiPathVectorIndex - cachedSkiPathVectorIndex + 1;
+	if (currentPathCountFromHop > hop->maxPathCount)
 	{
-		const SkiHop *ptr = this->skiPathVector[x];
-		if(ptr->rowIndex == hop->rowIndex &&
-			ptr->colIndex == hop->colIndex)
-		{
-			break;
-		}
-
-		// don't delete the node, as it is on this->cachedNodes vector 
-		// and will be deleted at the end;
-		//const SkiHop *toDel = this->skiPathVector[x];
-		//delete toDel;
-		//toDel = NULL;
-
-		this->skiPathVectorIndex--;
+		hop->maxPathCount = currentPathCountFromHop;
 	}
+	this->skiPathVectorIndex = cachedSkiPathVectorIndex;
 }
 
 int SkiResort::FindAvailableHops(const SkiHop *currentPoint, SkiHop *possibleHops[MAX_PATHS_FROM_ELEVATION])
@@ -379,4 +361,22 @@ void SkiResort::ClearCachedNodes()
 	delete[] this->CachedNodes;
 	this->CachedNodes = NULL;
 	cout << "( " << nodesDeleted << " nodes deleted from cache. )" << endl;
+}
+
+// first find out if it make sense to go down current hop path
+// we can do this, by calculating hop->maxPathCount + this->skiPathVectorIndex and comparing it
+// with this->prevNavPathCount; If going down current path, won't beat previous Nav Path Count
+// we don't want to go down current hop point;
+bool SkiResort::IsNavigatingMakeSense(const SkiHop *hop)
+{
+	// we don't know the best path count from hop - so go ahead and explore it.
+	// Also, note that if we are checking >=, this is because even if the path
+	// count is going to be same, the exploration from hop might beat on elevation drop;
+	if (hop->maxPathCount == -1 ||
+		this->skiPathVectorIndex + hop->maxPathCount >= this->prevNavPathCount)
+	{
+		return true;
+	}
+
+	return false;
 }

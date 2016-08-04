@@ -19,16 +19,19 @@
 #define SIMPLEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\SmallTestData.txt"
 #define LARGEDATAFILE "C:\\TestProjects\\SingaporeSkiing\\LargeTestData.txt"
 
+#define TimeBufSize 80
 int _tmain(int argc, _TCHAR* argv[])
 {
 	short **dataGrid = NULL;
 	char c;
 
+	char timeBuffer[TimeBufSize+1];
+
 	try
 	{
 		SkiHelper::Pause();
 
-		cout << SkiHelper::CurrentDateTime() << " Reading input data..." << endl;
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Reading input data..." << endl;
 		int rowCount = 0;
 		int colCount = 0;
 		dataGrid = SkiHelper::CreateTestData(LARGEDATAFILE, &rowCount, &colCount);
@@ -38,15 +41,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			return -1;
 		}
-
+		
 		/*
 		{
-			cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating class object..." << endl;
 			RouteGrid *rg = new RouteGrid(dataGrid, rowCount, colCount);
 
 			SkiHelper::Pause();
 
-			cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Validating input data values..." << endl;
 			bool dataStatus = rg->ValidateData(0, 1500);
 
 			if (!dataStatus)
@@ -58,29 +61,28 @@ int _tmain(int argc, _TCHAR* argv[])
 			SkiHelper::Pause();
 
 			// create nodes for the items in the array
-			cout << SkiHelper::CurrentDateTime() << " Creating graph list..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating graph list..." << endl;
 			rg->CreateList();
 
 			SkiHelper::Pause();
 
-			cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Finding Best Path..." << endl;
 			rg->DenormalizePaths();
 
 			SkiHelper::Pause();
 
-			cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Releasing Memory..." << endl;
 			delete rg;
 			rg = NULL;
 		}
 		*/
-	
-		/* *********************** */
 
+		/* *********************** */
 		{
-			cout << SkiHelper::CurrentDateTime() << " Creating class object..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Creating class object..." << endl;
 			SkiResort *sr = new SkiResort(dataGrid, rowCount, colCount);
 
-			cout << SkiHelper::CurrentDateTime() << " Validating input data values..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Validating input data values..." << endl;
 			bool dataStatus = sr->ValidateData(0, 1500);
 
 			if (!dataStatus)
@@ -91,23 +93,23 @@ int _tmain(int argc, _TCHAR* argv[])
 
 			SkiHelper::Pause();
 
-			cout << SkiHelper::CurrentDateTime() << " Finding Best Path..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Finding Best Path..." << endl;
 			sr->FindBestRoute();
 
 			SkiHelper::Pause();
-			cout << SkiHelper::CurrentDateTime() << " Releasing Memory..." << endl;
+			cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Releasing Memory..." << endl;
 			delete sr;
 			sr = NULL;
 		}
 
 		SkiHelper::Pause();
 
-		cout << SkiHelper::CurrentDateTime() << " Deleting Test Data from memory..." << endl;
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " Deleting Test Data from memory..." << endl;
 		SkiHelper::DeleteTestData(rowCount, colCount, dataGrid);
 		dataGrid = NULL;
 
 		SkiHelper::Pause();
-		cout << SkiHelper::CurrentDateTime() << " All Done" << endl;
+		cout << SkiHelper::CurrentDateTime(timeBuffer, TimeBufSize) << " All Done" << endl;
 	}
 	catch(std::exception &e)
 	{

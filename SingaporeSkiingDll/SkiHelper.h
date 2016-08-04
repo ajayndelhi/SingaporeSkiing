@@ -11,7 +11,7 @@ private:
 public:
 	static __declspec(dllexport) short ** CreateTestData(char *inputFile, int *rows, int *cols);
 	static __declspec(dllexport) void DeleteTestData(int rows, int cols, short **);
-	static __declspec(dllexport) const std::string CurrentDateTime();
+	static __declspec(dllexport) const char * CurrentDateTime(char *, int);
 	static __declspec(dllexport) void Pause();
 
 	static __declspec(dllexport) void GetTokensFromLine(char *buf, int maxTokens, short * const);

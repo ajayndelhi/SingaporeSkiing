@@ -36,10 +36,10 @@ private:
 
 	std::stringstream resultBuffer;
 
-	void ProcessElevationPoint(const SkiHop * const hop);
+	void ProcessElevationPoint(SkiHop * const hop);
 	void PersistSkiPath();
 	void ReadySkiPath();
-	void UnWindNavPath(const SkiHop *);
+	void UnWindNavPath(SkiHop *, int cachedSkiPathVectorIndex);
 
 	int FindAvailableHops(const SkiHop *, SkiHop *availableHops[MAX_PATHS_FROM_ELEVATION]);
 	bool IsMovePossible(const SkiHop *currentPoint, int tr, int tc);
@@ -50,6 +50,7 @@ private:
 	void DebugSkiPath();
 	void CreateCachedNodesArray();
 	void ClearCachedNodes();
+	bool IsNavigatingMakeSense(const SkiHop *);
 public:
 	__declspec(dllexport) SkiResort(short **data, int rows, int cols);
 	__declspec(dllexport) ~SkiResort();
