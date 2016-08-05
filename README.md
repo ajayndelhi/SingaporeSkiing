@@ -4,17 +4,21 @@ Date: Thursday, 4th August 2016
 
 Problem Definition:
 
-http://geeks.redmart.com/2015/01/07/skiing-in-singapore-a-coding-diversion/
+- http://geeks.redmart.com/2015/01/07/skiing-in-singapore-a-coding-diversion/
 
-Language: C++
-Main Entry point: SingaporeSkiing\SingaporeSkiing.cpp
-Dll Project: SingaporeSkiingDll
-Test Project: SingaporeSkiingTest
+Code Details:
 
-Sample Output: ProgramOutput.png
+- Language: C++ (Visual Studio 2012/2015)
+- Main Entry point: SingaporeSkiing\SingaporeSkiing.cpp
+- Dll Project: SingaporeSkiingDll
+- Test Project: SingaporeSkiingTest
 
-Test Data: SmallTestData.txt 
-           LargeTestData.txt
+Sample Output: 
+- ProgramOutput.png
+
+Test Data: 
+- SmallTestData.txt 
+- LargeTestData.txt
 
 Challenges Solved:
 - Performance
@@ -30,13 +34,13 @@ same skiing point again, we first check the longest path from that point.  We go
 - The code was initially written by making use of STL clases like Vector and then tested with List as well.  Realizing the slow performance, I reverted back to arrays.
 
 Limitations:
-To achieve efficiency, better memory usage - I have assumed that the max path length will be 100.  If the program crosses this limit, it throws exception in ProcessElevationPoint method.
+- To achieve efficiency, better memory usage - I have assumed that the max path length will be 100.  If the program crosses this limit, it throws exception in ProcessElevationPoint method.
 The limit can be increased easily by changing Max_Ski_Path_Size in SkiResort.h
 
 Pending Enhancements:
 
-Better error handing
-some more encapsulation
+- Better error handing
+- some more encapsulation
 
 *** End of Document ***
 
