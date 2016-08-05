@@ -1,5 +1,6 @@
 # SingaporeSkiing
 Find best Skiing route
+Date: Thursday, 4th August 2016
 
 Problem Definition:
 
